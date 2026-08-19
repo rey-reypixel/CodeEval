@@ -1,0 +1,36 @@
+[project]
+name = "codeeval"
+version = "0.1.0"
+description = "Benchmark harness for AI coding agents: dispatch ML tasks to LLMs, auto-grade on correctness, efficiency, and edge-case handling."
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+    "jsonschema>=4.21",
+    "pytest>=8.0",
+]
+
+[project.optional-dependencies]
+api = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlmodel>=0.0.22",
+]
+dispatch = [
+    "anthropic>=0.40",
+    "openai>=1.50",
+]
+sandbox = ["docker>=7.1"]
+dev = ["pytest-cov>=5.0", "ruff>=0.6"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["codeeval*"]
+
+# Harness tests only. Task tests live under tasks/*/tests and are run by the
+# grader against a submission, never by a bare `pytest` at the repo root.
+[tool.pytest.ini_options]
+testpaths = ["tests"]

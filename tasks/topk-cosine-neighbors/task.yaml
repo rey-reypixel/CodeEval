@@ -1,0 +1,53 @@
+id: topk-cosine-neighbors
+version: 1
+title: Top-k cosine neighbours
+tags: [numpy, similarity, vectorization]
+
+axes: [correctness, edge_case, efficiency]
+
+entrypoint:
+  function: topk_cosine_neighbors
+  signature: "topk_cosine_neighbors(X: np.ndarray, k: int) -> np.ndarray"
+
+timeout_seconds: 120
+
+efficiency:
+  sizes: [400, 800, 1600, 3200]
+  trials: 5
+  max_ratio: 15.0
+  max_exponent_delta: 0.5
+  repeats: 3
+  abort_seconds: 20.0
+  params:
+    d: 32
+    k: 10
+
+# Every behaviour the edge-case tests probe is stated here. Anything the tests
+# check that the prompt does not say is a measurement of guessing, not skill.
+prompt: |
+  Implement the following function in a single Python file, using only numpy
+  and the standard library.
+
+      def topk_cosine_neighbors(X: np.ndarray, k: int) -> np.ndarray:
+          ...
+
+  Given a 2-D array `X` of shape (n, d) whose rows are vectors, return an
+  integer array of shape (n, k_eff) where row i holds the indices of the k
+  rows most similar to row i by cosine similarity, ordered from most to
+  least similar.
+
+  Requirements:
+
+  - A row is never its own neighbour. Exclude index i from row i's results.
+  - `k_eff = min(k, n - 1)`. If the caller asks for more neighbours than
+    exist, return as many as there are rather than raising or padding.
+    If `k <= 0` or `n <= 1`, return an array of shape (n, 0).
+  - Cosine similarity with a zero vector is defined as 0.0. Zero-norm rows
+    must not produce NaN, inf, or a division warning.
+  - Ties in similarity are broken by preferring the smaller row index.
+  - Accept integer as well as floating-point input arrays.
+  - Do not modify `X` in place. The caller's array must be unchanged on return.
+  - The returned array must have an integer dtype.
+
+  Your solution will be timed against a reference implementation on inputs of
+  up to a few thousand rows, so it must scale well in `n`.

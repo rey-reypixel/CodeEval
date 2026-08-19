@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rey-reypixel/CodeEval/tasks/_schema/task.schema.json",
+  "title": "CodeEval task specification",
+  "description": "Every directory under tasks/ must carry a task.yaml validating against this schema. Adding a benchmark task is a data change, never a harness change.",
+  "type": "object",
+  "required": [
+    "id",
+    "version",
+    "title",
+    "axes",
+    "entrypoint",
+    "prompt"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Stable identifier. Must match the directory name."
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Bump whenever the prompt or tests change, so old results stay comparable only to their own version."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Free-form grouping, e.g. numpy, feature-engineering, sklearn."
+    },
+    "axes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "correctness",
+          "edge_case",
+          "efficiency"
+        ]
+      }
+    },
+    "entrypoint": {
+      "type": "object",
+      "required": [
+        "function"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "function": {
+          "type": "string",
+          "description": "Callable the submission must define."
+        },
+        "signature": {
+          "type": "string",
+          "description": "Human-readable signature, shown in the prompt."
+        }
+      }
+    },
+    "timeout_seconds": {
+      "type": "number",
+      "minimum": 1,
+      "default": 60
+    },
+    "efficiency": {
+      "type": "object",
+      "required": [
+        "sizes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "sizes": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "description": "Geometrically spaced input sizes. At least two, or the exponent cannot be fit."
+        },
+        "trials": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 5
+        },
+        "max_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 15.0
+        },
+        "max_exponent_delta": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0.5
+        },
+        "abort_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 20.0
+        },
+        "params": {
+          "type": "object",
+          "description": "Task-specific knobs passed to data/generate.py make_args().",
+          "additionalProperties": true
+        },
+        "repeats": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 3,
+          "description": "Full sweeps to run; each size keeps the median. Single sweeps are too noisy to threshold on."
+        }
+      }
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 50,
+      "description": "Exactly what the model is shown. Must fully specify behaviour the hidden edge-case tests check -- a test for behaviour the prompt never stated measures mind-reading, not skill."
+    }
+  }
+}
